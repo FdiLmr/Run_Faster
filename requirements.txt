@@ -1,0 +1,11 @@
+flask
+requests
+pandas
+scikit-learn
+xgboost
+matplotlib
+plotly
+python-dotenv
+pytest
+black
+ruff
