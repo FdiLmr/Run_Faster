@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12.7'
+
+    - name: 🧪 Create virtualenv and install deps
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 🧹 Lint with Ruff
+      run: |
+        source venv/bin/activate
+        ruff .
+
+    - name: 🎨 Check code formatting with Black
+      run: |
+        source venv/bin/activate
+        black --check .
+
+    - name: ✅ Run Pytest
+      run: |
+        source venv/bin/activate
+        pytest
