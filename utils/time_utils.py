@@ -1,5 +1,6 @@
 import math
 
+
 def format_runtime(total_seconds: float) -> str:
     """
     Convert a number of seconds (int or float) into a run-time string.
