@@ -11,8 +11,8 @@ from .inference import predict_marathon_time_model1, predict_marathon_time_model
 __version__ = "1.0.0"
 __all__ = [
     "Neuromodel1",
-    "Neuromodel2", 
+    "Neuromodel2",
     "MarathonPredictor",
     "predict_marathon_time_model1",
-    "predict_marathon_time_model2"
+    "predict_marathon_time_model2",
 ]
