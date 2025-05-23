@@ -19,6 +19,15 @@ def format_runtime(total_seconds: float) -> str:
     if total_seconds < 3600:
         rounded = min(rounded, 3599)
 
+    if total_seconds < 7200:
+        rounded = min(rounded, 7199)
+
+    if total_seconds < 14400:
+        rounded = min(rounded, 14399)
+
+    if total_seconds < 28800:
+        rounded = min(rounded, 28799)
+
     hours = rounded // 3600
     rem = rounded % 3600
     minutes = rem // 60
@@ -28,3 +37,10 @@ def format_runtime(total_seconds: float) -> str:
         return f"{hours}:{minutes:02d}:{seconds:02d}"
     else:
         return f"{minutes}:{seconds:02d}"
+
+
+def hms_to_minutes(h, m, s):
+    """
+    Convert a time in hours, minutes, and seconds to minutes.
+    """
+    return h * 60 + m + s / 60
