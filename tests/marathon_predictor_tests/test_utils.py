@@ -225,7 +225,7 @@ class TestUtilsIntegration:
         training_data = [[5000, 1200, 50], [10000, 2400, 60]]
         original_scaler.fit(training_data)
 
-        test_input = torch.tensor([[7500, 1800, 55]], dtype=torch.float32)
+        torch.tensor([[7500, 1800, 55]], dtype=torch.float32)
         test_input_scaled = original_scaler.transform([[7500, 1800, 55]])
         test_tensor = torch.tensor(test_input_scaled, dtype=torch.float32)
 
