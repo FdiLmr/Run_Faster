@@ -12,3 +12,5 @@ ruff
 tqdm
 torch
 joblib
+environs
+pymysql
