@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Race Predictions - Athlete {{ athlete_id }}{% endblock %}
+
+{% block content %}
+<div x-data="racePredictions" class="pb-10">
+  <!-- Page Header -->
+  <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Race Predictions for Athlete {{ athlete_id }}</h1>
+    <div class="mt-4 md:mt-0">
+      <a href="/dashboard/{{ athlete_id }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-strava-orange hover:bg-strava-orange-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Explanation Card -->
+  <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">About Race Predictions</h2>
+    <p class="text-gray-700 mb-3">
+      These predictions are based on Riegel's formula: T2 = T1 × (D2/D1)<sup>e</sup>, where <strong>e</strong> is your personalized exponent 
+      calculated from your best 5K and 10K performances.
+    </p>
+    <div class="flex flex-wrap gap-4 mt-4">
+      <div class="bg-blue-50 rounded-md p-3 flex-1 min-w-[250px]">
+        <h3 class="text-sm font-medium text-blue-800 mb-1">Your Calculated Exponent</h3>
+        <p class="text-xl font-semibold text-blue-900">{{ prediction_data.exponent|round(4) }}</p>
+        <p class="text-xs text-blue-700 mt-1">
+          Typical values range from 1.05 to 1.15. Lower values indicate better endurance.
+        </p>
+      </div>
+      <div class="bg-green-50 rounded-md p-3 flex-1 min-w-[250px]">
+        <h3 class="text-sm font-medium text-green-800 mb-1">Based On Performance</h3>
+        <p class="text-xl font-semibold text-green-900">{{ (prediction_data.base_performance.distance / 1000)|round(1) }}km in {{ prediction_data.base_performance.formatted_time }}</p>
+        <p class="text-xs text-green-700 mt-1">
+          We use your best performance (with highest VDOT) as the base for predictions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prediction Ranges -->
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Race Prediction Ranges</h2>
+    <p class="text-gray-600 mb-6">
+      Each prediction includes three target times: optimistic (push yourself), realistic (your likely time), and conservative (safe target).
+    </p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for race_name, predictions in prediction_data.predictions.items() %}
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <h3 class="font-medium text-gray-900">{{ race_name }}</h3>
+        </div>
+        <div class="p-4">
+          <div class="mb-3">
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-green-600">Optimistic</span>
+              <span class="text-sm text-gray-500">Push yourself</span>
+            </div>
+            <p class="text-lg font-bold">
+              {% if format_time is defined %}
+                {{ format_time(predictions.optimistic) }}
+              {% else %}
+                {{ predictions.optimistic }}
+              {% endif %}
+            </p>
+          </div>
+          
+          <div class="mb-3 border-t border-gray-100 pt-3">
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-blue-600">Realistic</span>
+              <span class="text-sm text-gray-500">Likely time</span>
+            </div>
+            <p class="text-xl font-bold">
+              {% if format_time is defined %}
+                {{ format_time(predictions.realistic) }}
+              {% else %}
+                {{ predictions.realistic }}
+              {% endif %}
+            </p>
+          </div>
+          
+          <div class="border-t border-gray-100 pt-3">
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-yellow-600">Conservative</span>
+              <span class="text-sm text-gray-500">Safe target</span>
+            </div>
+            <p class="text-lg font-bold">
+              {% if format_time is defined %}
+                {{ format_time(predictions.conservative) }}
+              {% else %}
+                {{ predictions.conservative }}
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Training Advice -->
+  <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Training Recommendations</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <h3 class="text-sm font-medium text-gray-800 mb-2">Improve Your Endurance</h3>
+        <p class="text-gray-700 text-sm mb-2">
+          Your Riegel exponent ({{ prediction_data.exponent|round(3) }}) indicates how your performance decreases as race distance increases.
+          A lower exponent means better endurance.
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <li>Include more long runs in your training</li>
+          <li>Gradually increase weekly volume</li>
+          <li>Add tempo runs at marathon pace</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-800 mb-2">Race Preparation Tips</h3>
+        <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <li>Start with the conservative pace for the first third</li>
+          <li>Aim for realistic pace through the middle section</li>
+          <li>If feeling strong, push toward optimistic pace in final section</li>
+          <li>Adjust based on course profile and weather conditions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('racePredictions', () => ({
+      init() {
+        // Any initialization can go here
+      }
+    }))
+  })
+</script>
+{% endblock %} 

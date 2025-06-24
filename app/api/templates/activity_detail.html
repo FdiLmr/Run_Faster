@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.name|default('Activity Details') }} - {{ activity.start_date.strftime('%Y-%m-%d') if activity.start_date else 'Activity' }}{% endblock %}
+
+{% block content %}
+<!-- Activity Header with Navigation -->
+<div class="mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <!-- Navigation arrows -->
+    <div class="flex items-center space-x-2">
+      {% if prev_activity %}
+        <a href="/activity/{{ prev_activity.id }}?athlete_id={{ athlete_id }}" 
+           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange"
+           title="{{ prev_activity.name }}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="ml-1 hidden sm:inline">Previous</span>
+        </a>
+      {% else %}
+        <div class="inline-flex items-center px-3 py-2 border border-gray-200 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="ml-1 hidden sm:inline">Previous</span>
+        </div>
+      {% endif %}
+      
+      <a href="/view_activities/{{ athlete_id }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        <span class="hidden sm:inline">All Activities</span>
+      </a>
+      
+      {% if next_activity %}
+        <a href="/activity/{{ next_activity.id }}?athlete_id={{ athlete_id }}" 
+           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange"
+           title="{{ next_activity.name }}">
+          <span class="mr-1 hidden sm:inline">Next</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      {% else %}
+        <div class="inline-flex items-center px-3 py-2 border border-gray-200 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+          <span class="mr-1 hidden sm:inline">Next</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Activity Title and Date -->
+  <div class="text-center mb-4">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ activity.name|default('Activity Details') }}</h1>
+    {% if activity.start_date %}
+      <p class="text-lg text-gray-600">{{ activity.start_date.strftime('%A, %B %d, %Y at %I:%M %p') }}</p>
+    {% endif %}
+    {% if activity.suffer_score %}
+      <div class="mt-2">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5 9.293 10.793a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"/>
+          </svg>
+          Activity Load: {{ activity.suffer_score|int }}
+        </span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Activity Type Badge -->
+{% if activity.activity_type %}
+<div class="mb-6">
+  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+    {% if activity.activity_type == 'Run' or activity.activity_type == 1 %}
+      bg-blue-100 text-blue-800
+    {% elif activity.activity_type == 'Ride' or activity.activity_type == 2 %}
+      bg-green-100 text-green-800
+    {% elif activity.activity_type == 'Swim' or activity.activity_type == 3 %}
+      bg-cyan-100 text-cyan-800
+    {% else %}
+      bg-purple-100 text-purple-800
+    {% endif %}">
+    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    {% if activity.activity_type == 1 or activity.activity_type == 'Run' %}Running Activity{% else %}{{ activity.activity_type }}{% endif %}
+  </span>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <!-- Main Metrics Cards -->
+  <div class="lg:col-span-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- Distance Card -->
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-blue-600 mb-1">Distance</p>
+            <p class="text-2xl font-bold text-blue-900">
+              {% if activity.distance %}
+                {{ "%.2f"|format(activity.distance / 1000) }} km
+              {% else %}
+                --
+              {% endif %}
+            </p>
+          </div>
+          <div class="p-3 bg-blue-200 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Card -->
+      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-green-600 mb-1">Moving Time</p>
+            <p class="text-2xl font-bold text-green-900">
+              {% if activity.elapsed_time %}
+                {% set hours = (activity.elapsed_time // 3600)|int %}
+                {% set minutes = ((activity.elapsed_time % 3600) // 60)|int %}
+                {% set seconds = (activity.elapsed_time % 60)|int %}
+                {% if hours > 0 %}
+                  {{ hours }}:{{ "%02d"|format(minutes) }}:{{ "%02d"|format(seconds) }}
+                {% else %}
+                  {{ minutes }}:{{ "%02d"|format(seconds) }}
+                {% endif %}
+              {% else %}
+                --:--
+              {% endif %}
+            </p>
+          </div>
+          <div class="p-3 bg-green-200 rounded-full">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pace Card (Running-specific) -->
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-orange-600 mb-1">Average Pace</p>
+            <p class="text-2xl font-bold text-orange-900">
+              {% if activity.pace and activity.pace > 0 %}
+                {% set pace_min_per_km = 1000 / (activity.pace * 60) %}
+                {% set pace_minutes = pace_min_per_km|int %}
+                {% set pace_seconds = ((pace_min_per_km - pace_minutes) * 60)|int %}
+                {{ pace_minutes }}:{{ "%02d"|format(pace_seconds) }}
+              {% elif activity.distance and activity.elapsed_time and activity.distance > 0 %}
+                {% set calc_pace = (activity.elapsed_time / 60) / (activity.distance / 1000) %}
+                {% set pace_minutes = calc_pace|int %}
+                {% set pace_seconds = ((calc_pace - pace_minutes) * 60)|int %}
+                {{ pace_minutes }}:{{ "%02d"|format(pace_seconds) }}
+              {% else %}
+                --:--
+              {% endif %}
+              <span class="text-sm font-normal text-orange-700">min/km</span>
+            </p>
+          </div>
+          <div class="p-3 bg-orange-200 rounded-full">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heart Rate Card -->
+      <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-red-600 mb-1">Avg Heart Rate</p>
+            <p class="text-2xl font-bold text-red-900">
+              {% if activity.mean_hr %}
+                {{ "%.0f"|format(activity.mean_hr) }}
+              {% else %}
+                --
+              {% endif %}
+              <span class="text-sm font-normal text-red-700">bpm</span>
+            </p>
+          </div>
+          <div class="p-3 bg-red-200 rounded-full">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left Column: Running Performance Metrics -->
+  <div class="lg:col-span-2">
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mb-6">
+      <div class="bg-gradient-to-r from-strava-orange to-strava-orange-light px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-white flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+          </svg>
+          Running Performance
+        </h3>
+      </div>
+      <div class="px-6 py-4">
+        <div class="grid grid-cols-1 gap-4">
+          
+          <!-- Elevation Gain -->
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500">Elevation Gain</p>
+                <p class="text-lg font-semibold text-gray-900">
+                  {% if activity.elevation %}
+                    {{ "%.0f"|format(activity.elevation) }} m
+                  {% else %}
+                    -- m
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cadence -->
+          {% if activity.cadence %}
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-2 bg-indigo-100 rounded-lg mr-3">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500">Cadence</p>
+                <p class="text-lg font-semibold text-gray-900">{{ "%.0f"|format(activity.cadence) }} spm</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Pace Variability -->
+          {% if activity.stdev_pace %}
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-2 bg-yellow-100 rounded-lg mr-3">
+                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500">Pace Consistency</p>
+                <p class="text-lg font-semibold text-gray-900">
+                  {% if activity.stdev_pace < 0.5 %}
+                    <span class="text-green-600">Excellent</span>
+                  {% elif activity.stdev_pace < 1.0 %}
+                    <span class="text-yellow-600">Good</span>
+                  {% else %}
+                    <span class="text-red-600">Variable</span>
+                  {% endif %}
+                </p>
+                <p class="text-xs text-gray-500">σ = {{ "%.2f"|format(activity.stdev_pace) }}</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+    
+    <!-- Best Efforts Section -->
+    {% if activity.best_efforts and activity.best_efforts|length > 0 %}
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mb-6">
+      <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-white flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          Best Efforts
+        </h3>
+      </div>
+      <div class="px-6 py-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {% for effort in activity.best_efforts %}
+            <div class="bg-green-50 rounded-lg p-3 border border-green-200">
+              <div class="flex flex-col space-y-1">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-green-800">{{ effort.distance }}</p>
+                  <div class="text-green-600">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5 9.293 10.793a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-lg font-bold text-green-900">
+                    {% set hours = (effort.time // 3600)|int %}
+                    {% set minutes = ((effort.time % 3600) // 60)|int %}
+                    {% set seconds = (effort.time % 60)|int %}
+                    {% if hours > 0 %}
+                      {{ hours }}:{{ "%02d"|format(minutes) }}:{{ "%02d"|format(seconds) }}
+                    {% else %}
+                      {{ minutes }}:{{ "%02d"|format(seconds) }}
+                    {% endif %}
+                  </p>
+                  <p class="text-xs text-green-700">
+                    {% set pace_minutes = (effort.pace)|int %}
+                    {% set pace_seconds = ((effort.pace - pace_minutes) * 60)|int %}
+                    {{ pace_minutes }}:{{ "%02d"|format(pace_seconds) }} min/km
+                  </p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column: Heart Rate Analysis -->
+  <div class="lg:col-span-2">
+    <!-- HR Zone Distribution -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+          Heart Rate Zones
+        </h3>
+      </div>
+      <div class="px-6 py-4">
+        <canvas id="hr-zone-chart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- HR Stats -->
+    {% if activity.mean_hr %}
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Heart Rate Statistics</h3>
+      </div>
+      <div class="px-6 py-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-center p-3 bg-red-50 rounded-lg">
+            <p class="text-sm font-medium text-red-600">Average HR</p>
+            <p class="text-xl font-bold text-red-900">{{ "%.0f"|format(activity.mean_hr) }}</p>
+            <p class="text-xs text-red-600">bpm</p>
+          </div>
+          {% if activity.stdev_hr %}
+          <div class="text-center p-3 bg-orange-50 rounded-lg">
+            <p class="text-sm font-medium text-orange-600">HR Variability</p>
+            <p class="text-xl font-bold text-orange-900">{{ "%.1f"|format(activity.stdev_hr) }}</p>
+            <p class="text-xs text-orange-600">σ bpm</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Full Width: Detailed Metrics Table -->
+  <div class="lg:col-span-4">
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Detailed Activity Metrics</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <tbody class="bg-white divide-y divide-gray-200">
+            
+            <!-- Zone Distribution Row -->
+            {% if activity.time_in_z1 or activity.time_in_z2 or activity.time_in_z3 or activity.time_in_z4 or activity.time_in_z5 %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Heart Rate Zones</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <div class="flex space-x-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Z1: {{ ((activity.time_in_z1 or 0) * 100)|round(1) }}%
+                  </span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Z2: {{ ((activity.time_in_z2 or 0) * 100)|round(1) }}%
+                  </span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Z3: {{ ((activity.time_in_z3 or 0) * 100)|round(1) }}%
+                  </span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                    Z4: {{ ((activity.time_in_z4 or 0) * 100)|round(1) }}%
+                  </span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Z5: {{ ((activity.time_in_z5 or 0) * 100)|round(1) }}%
+                  </span>
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+
+            <!-- Advanced Metrics -->
+            {% if activity.freq_hr %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">HR Peak Frequency</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ "%.1f"|format(activity.freq_hr) }} bpm</td>
+            </tr>
+            {% endif %}
+
+
+
+            {% if activity.stdev_elevation %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Elevation Variability</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ "%.1f"|format(activity.stdev_elevation) }} m</td>
+            </tr>
+            {% endif %}
+
+            {% if activity.freq_elevation %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Most Common Elevation</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ "%.0f"|format(activity.freq_elevation) }} m</td>
+            </tr>
+            {% endif %}
+
+            <!-- Activity Metadata -->
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Activity ID</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{ activity.activity_id }}</td>
+            </tr>
+
+            {% if activity.block_id %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Training Block</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ activity.block_id }}</td>
+            </tr>
+            {% endif %}
+
+            {% if activity.week_id %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Training Week</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ activity.week_id }}</td>
+            </tr>
+            {% endif %}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Prepare HR zone values from the activity record
+    var hrZoneValues = [
+      {{ activity.time_in_z1 or 0 }},
+      {{ activity.time_in_z2 or 0 }},
+      {{ activity.time_in_z3 or 0 }},
+      {{ activity.time_in_z4 or 0 }},
+      {{ activity.time_in_z5 or 0 }}
+    ];
+    var hrZoneLabels = ['Zone 1 (Easy)', 'Zone 2 (Aerobic)', 'Zone 3 (Tempo)', 'Zone 4 (Threshold)', 'Zone 5 (VO2 Max)'];
+    
+    // Convert to percentages
+    var hrZonePercentages = hrZoneValues.map(function(value) {
+      return (value * 100).toFixed(1);
+    });
+    
+    // Filter out zero values for cleaner chart
+    var filteredData = [];
+    var filteredLabels = [];
+    var filteredColors = [];
+    var colors = [
+      '#10B981', // Green - Z1
+      '#3B82F6', // Blue - Z2  
+      '#F59E0B', // Yellow - Z3
+      '#EF4444', // Red - Z4
+      '#7C2D12'  // Dark Red - Z5
+    ];
+
+    for (let i = 0; i < hrZonePercentages.length; i++) {
+      if (parseFloat(hrZonePercentages[i]) > 0) {
+        filteredData.push(hrZonePercentages[i]);
+        filteredLabels.push(hrZoneLabels[i]);
+        filteredColors.push(colors[i]);
+      }
+    }
+    
+    // Create Chart.js doughnut chart
+    var ctx = document.getElementById('hr-zone-chart').getContext('2d');
+    if (filteredData.length > 0) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: filteredLabels,
+          datasets: [{
+            data: filteredData,
+            backgroundColor: filteredColors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 15,
+                font: {
+                  size: 11
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.label}: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    } else {
+      // Show message if no HR data
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#6B7280';
+      ctx.textAlign = 'center';
+      ctx.fillText('No heart rate data available', ctx.canvas.width/2, ctx.canvas.height/2);
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,960 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Athlete {{ athlete_id }}{% endblock %}
+
+{% block content %}
+<div x-data="dashboard">
+  <!-- Dashboard Header -->
+  <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard for Athlete {{ athlete_id }}</h1>
+    <div class="mt-4 md:mt-0 flex space-x-2">
+      <a href="/view_best_efforts/{{ athlete_id }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-strava-orange hover:bg-strava-orange-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Best Efforts
+      </a>
+      <a href="/race_predictions/{{ athlete_id }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Race Predictions
+      </a>
+      <a href="/view_stats/{{ athlete_id }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Detailed Stats
+      </a>
+    </div>
+  </div>
+
+  <!-- Dashboard Navigation Tabs -->
+  <div class="border-b border-gray-200 mb-6">
+    <nav class="-mb-px flex space-x-6">
+      <button @click="setActiveTab('overview')" :class="{'border-strava-orange text-strava-orange': activeTab === 'overview', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'overview'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+        Overview
+      </button>
+      <button @click="setActiveTab('running')" :class="{'border-strava-orange text-strava-orange': activeTab === 'running', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'running'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+        Running Volume
+      </button>
+      <button @click="setActiveTab('trends')" :class="{'border-strava-orange text-strava-orange': activeTab === 'trends', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'trends'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+        Training Trends
+      </button>
+      <button @click="setActiveTab('predictions')" :class="{'border-strava-orange text-strava-orange': activeTab === 'predictions', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'predictions'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+        Race Predictions
+      </button>
+      <button @click="setActiveTab('activities')" :class="{'border-strava-orange text-strava-orange': activeTab === 'activities', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'activities'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+        Recent Activities
+      </button>
+    </nav>
+  </div>
+
+  <!-- Overview Tab -->
+  <div x-show="activeTab === 'overview'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Weekly Distance -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium text-gray-500">Weekly Distance</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">+12%</span>
+        </div>
+        <div class="mt-2 flex items-baseline">
+          <p class="text-2xl font-semibold text-gray-900" id="weekly-distance">--</p>
+          <p class="ml-1 text-sm text-gray-500">km</p>
+        </div>
+        <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-strava-orange h-1.5 rounded-full" style="width: 65%"></div>
+        </div>
+      </div>
+      
+      <!-- Monthly Distance -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium text-gray-500">Monthly Distance</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">+5%</span>
+        </div>
+        <div class="mt-2 flex items-baseline">
+          <p class="text-2xl font-semibold text-gray-900" id="monthly-distance">--</p>
+          <p class="ml-1 text-sm text-gray-500">km</p>
+        </div>
+        <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-strava-orange h-1.5 rounded-full" style="width: 45%"></div>
+        </div>
+      </div>
+      
+      <!-- Average Elevation -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium text-gray-500">Weekly Elevation</h3>
+          <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Avg</span>
+        </div>
+        <div class="mt-2 flex items-baseline">
+          <p class="text-2xl font-semibold text-gray-900" id="weekly-elevation">--</p>
+          <p class="ml-1 text-sm text-gray-500">m</p>
+        </div>
+        <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-green-500 h-1.5 rounded-full" style="width: 60%"></div>
+        </div>
+      </div>
+      
+      <!-- Training Load -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="flex justify-between">
+          <h3 class="text-sm font-medium text-gray-500">Training Load</h3>
+          <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Moderate</span>
+        </div>
+        <div class="mt-2 flex items-baseline">
+          <p class="text-2xl font-semibold text-gray-900" id="training-load">--</p>
+          <p class="ml-1 text-sm text-gray-500">Suffer Score</p>
+        </div>
+        <div class="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-yellow-500 h-1.5 rounded-full" style="width: 50%"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Second Row Widgets -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Recent Activities -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-gray-200">
+          <h3 class="font-medium text-gray-900">Recent Activities</h3>
+          <a href="/view_activities/{{ athlete_id }}" class="text-xs text-strava-orange hover:text-strava-orange-dark font-medium">
+            View All
+          </a>
+        </div>
+        <div id="recent-activities">
+          <div class="animate-pulse">
+            <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+            <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+            <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+            <div class="h-14 bg-gray-200 rounded-md"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Race Predictions Widget -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="font-medium text-gray-900">Race Predictions</h3>
+          <a href="/race_predictions/{{ athlete_id }}" class="text-xs text-strava-orange hover:text-strava-orange-dark font-medium">
+            View All
+          </a>
+        </div>
+        <div class="p-4">
+          <div id="race-predictions-container" class="space-y-3">
+            <div class="text-center py-8" id="prediction-loading">
+              <svg class="animate-spin h-6 w-6 text-gray-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-sm text-gray-500 mt-2">Loading predictions...</p>
+            </div>
+            
+            <div id="prediction-error" class="hidden text-center py-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p class="text-sm text-gray-600 mt-2">Missing required personal bests</p>
+              <p class="text-xs text-gray-500 mt-1">Need both 5K and 10K bests</p>
+            </div>
+            
+            <div id="prediction-content" class="hidden">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-gray-500">Based on your 5K/10K times</span>
+                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" id="prediction-exponent">e=1.06</span>
+              </div>
+              
+              <div class="space-y-2">
+                <!-- Populated via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Weekly Distance Breakdown -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <h3 class="text-base font-medium text-gray-900 mb-4">Weekly Running Volume</h3>
+        <div style="height: 250px; position: relative;">
+          <canvas id="weekly-volume-chart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Monthly Running Volume -->
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <h3 class="text-base font-medium text-gray-900 mb-4">Monthly Running Volume</h3>
+        <div style="height: 250px; position: relative;">
+          <canvas id="monthly-volume-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Running Volume Tab -->
+  <div x-show="activeTab === 'running'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+      <div class="flex flex-col md:flex-row justify-between mb-4">
+        <h3 class="text-base font-medium text-gray-900 mb-2 md:mb-0">Running Volume</h3>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div class="flex items-center">
+            <label for="granularity-select" class="mr-2 text-sm text-gray-500">View:</label>
+            <select id="granularity-select" class="block w-28 pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-strava-orange focus:border-strava-orange rounded-md shadow-sm">
+              <option value="weekly" selected>Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="flex items-center">
+            <label for="volume-start-date" class="mx-2 text-sm text-gray-500">From:</label>
+            <input type="date" id="volume-start-date" class="block w-full pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-strava-orange focus:border-strava-orange rounded-md shadow-sm">
+          </div>
+          <div class="flex items-center">
+            <label for="volume-end-date" class="mx-2 text-sm text-gray-500">To:</label>
+            <input type="date" id="volume-end-date" class="block w-full pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-strava-orange focus:border-strava-orange rounded-md shadow-sm">
+          </div>
+          <button onclick="loadVolumeChart()" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-strava-orange hover:bg-strava-orange-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-strava-orange">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Update
+          </button>
+        </div>
+      </div>
+      <div style="height: 300px; position: relative; max-width: 100%; overflow: hidden;">
+        <canvas id="volume-chart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Training Trends Tab -->
+  <div x-show="activeTab === 'trends'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+      <h3 class="text-base font-medium text-gray-900 mb-4">Training Trends</h3>
+      <div id="time-series-chart-container">
+        <canvas id="time-series-chart" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Race Predictions Tab -->
+  <div x-show="activeTab === 'predictions'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Race Predictions</h2>
+      <a href="/race_predictions/{{ athlete_id }}" class="inline-flex items-center text-sm text-strava-orange hover:text-strava-orange-dark font-medium">
+        <span>Full Details</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+    
+    <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- About Predictions -->
+      <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+        <h3 class="text-md font-semibold text-gray-900 mb-3">About Race Predictions</h3>
+        <p class="text-sm text-gray-700 mb-3">
+          These predictions use Riegel's formula: T2 = T1 × (D2/D1)<sup>e</sup>, with a personalized exponent 
+          calculated from your best 5K and 10K performances.
+        </p>
+        
+        <div id="prediction-tab-loading" class="py-4 text-center">
+          <svg class="animate-spin h-5 w-5 text-gray-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        
+        <div id="prediction-tab-error" class="hidden py-4 text-center">
+          <p class="text-sm text-red-600">Unable to generate predictions. You need both 5K and 10K personal bests.</p>
+        </div>
+        
+        <div id="prediction-tab-info" class="hidden">
+          <div class="mt-3 grid grid-cols-2 gap-4">
+            <div class="bg-blue-50 rounded-md p-3">
+              <h4 class="text-xs font-medium text-blue-800 mb-1">Your Calculated Exponent</h4>
+              <p id="prediction-tab-exponent" class="text-lg font-semibold text-blue-900">1.06</p>
+              <p class="text-xs text-blue-700 mt-1">Lower values indicate better endurance</p>
+            </div>
+            <div class="bg-green-50 rounded-md p-3">
+              <h4 class="text-xs font-medium text-green-800 mb-1">Based On Performance</h4>
+              <p id="prediction-tab-base" class="text-lg font-semibold text-green-900">5K in 20:30</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Training Tips -->
+      <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+        <h3 class="text-md font-semibold text-gray-900 mb-3">Training Recommendations</h3>
+        <div id="prediction-tab-recommendations" class="hidden">
+          <div>
+            <h4 class="text-sm font-medium text-gray-800 mb-2">Improve Your Endurance</h4>
+            <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+              <li>Include more long runs in your training</li>
+              <li>Gradually increase weekly volume</li>
+              <li>Add tempo runs at marathon pace</li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <h4 class="text-sm font-medium text-gray-800 mb-2">Race Preparation Tips</h4>
+            <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+              <li>Start with the conservative pace for the first third</li>
+              <li>Aim for realistic pace through the middle section</li>
+              <li>If feeling strong, push toward optimistic pace in final section</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Prediction Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+        <h3 class="font-medium text-gray-900">Race Time Predictions</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr class="bg-gray-50">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Race Distance</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Optimistic</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Realistic</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conservative</th>
+            </tr>
+          </thead>
+          <tbody id="prediction-tab-table" class="bg-white divide-y divide-gray-200">
+            <!-- Will be populated by JavaScript -->
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
+                Loading predictions...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <script>
+      // Load the prediction data for this tab
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('dashboard', () => ({
+          // ... existing code ...
+          
+          // Add this method to handle showing the predictions tab
+          loadPredictionsTabData() {
+            if (this.activeTab !== 'predictions') return;
+            
+            fetch(`/api/race-prediction-data/{{ athlete_id }}`)
+              .then(response => response.json())
+              .then(data => {
+                // Hide loading indicator
+                document.getElementById('prediction-tab-loading').classList.add('hidden');
+                
+                if (data.error) {
+                  // Show error if no predictions
+                  document.getElementById('prediction-tab-error').classList.remove('hidden');
+                  return;
+                }
+                
+                // Show the info sections
+                document.getElementById('prediction-tab-info').classList.remove('hidden');
+                document.getElementById('prediction-tab-recommendations').classList.remove('hidden');
+                
+                // Set exponent and base performance info
+                document.getElementById('prediction-tab-exponent').textContent = data.exponent.toFixed(3);
+                
+                // Populate the table
+                const tableBody = document.getElementById('prediction-tab-table');
+                tableBody.innerHTML = '';
+                
+                // Get full prediction data to show more details
+                fetch(`/api/full-race-predictions/{{ athlete_id }}`)
+                  .then(response => response.json())
+                  .then(fullData => {
+                    // Update the base performance display
+                    const basePerf = fullData.base_performance;
+                    document.getElementById('prediction-tab-base').textContent = 
+                      `${(basePerf.distance/1000).toFixed(1)}K in ${basePerf.formatted_time}`;
+                    
+                    // Add rows for each prediction
+                    Object.entries(fullData.predictions).forEach(([race, pred]) => {
+                      const row = document.createElement('tr');
+                      row.className = 'hover:bg-gray-50';
+                      
+                      row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${race}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pred.optimistic}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">${pred.realistic}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pred.conservative}</td>
+                      `;
+                      
+                      tableBody.appendChild(row);
+                    });
+                  })
+                  .catch(err => {
+                    console.error('Error loading full predictions:', err);
+                    tableBody.innerHTML = `
+                      <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-red-500">
+                          Failed to load detailed predictions.
+                        </td>
+                      </tr>
+                    `;
+                  });
+              })
+              .catch(error => {
+                console.error('Error loading predictions tab data:', error);
+                document.getElementById('prediction-tab-loading').classList.add('hidden');
+                document.getElementById('prediction-tab-error').classList.remove('hidden');
+              });
+          },
+          
+          setActiveTab(tab) {
+            this.activeTab = tab;
+            // Small delay to make sure DOM is updated before resizing charts
+            setTimeout(() => {
+              if (monthlyVolumeChart) monthlyVolumeChart.resize();
+              if (weeklyVolumeChart) weeklyVolumeChart.resize();
+              if (volumeChartInstance) volumeChartInstance.resize();
+              
+              // Load predictions tab data if needed
+              if (tab === 'predictions') {
+                this.loadPredictionsTabData();
+              }
+            }, 50);
+          }
+        }));
+      });
+    </script>
+  </div>
+
+  <!-- Activities Tab -->
+  <div x-show="activeTab === 'activities'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-medium text-gray-900">Recent Activities</h3>
+        <a href="/view_activities/{{ athlete_id }}" class="text-strava-orange hover:text-strava-orange-dark text-sm font-medium">
+          View All
+        </a>
+      </div>
+      <div id="recent-activities">
+        <div class="animate-pulse">
+          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
+          <div class="h-14 bg-gray-200 rounded-md"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  var athleteId = "{{ athlete_id }}";
+  var weeklyVolumeChart = null;
+  var monthlyVolumeChart = null;
+  var volumeChartInstance = null;
+  
+  // On page load, set default date values and load data
+  window.onload = function() {
+    setupDateRanges();
+    loadDashboardData();
+    loadVolumeChart();
+  };
+  
+  function setupDateRanges() {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); // Month is zero-indexed.
+    var dd = String(today.getDate()).padStart(2, '0');
+    
+    // Format today's date in yyyy-mm-dd
+    var todayStr = yyyy + '-' + mm + '-' + dd;
+    
+    // Set start date to 3 months ago
+    var startDate = new Date();
+    startDate.setMonth(today.getMonth() - 3);
+    var startYYYY = startDate.getFullYear();
+    var startMM = String(startDate.getMonth() + 1).padStart(2, '0');
+    var startDD = String(startDate.getDate()).padStart(2, '0');
+    var startDateStr = startYYYY + '-' + startMM + '-' + startDD;
+    
+    document.getElementById('volume-start-date').value = startDateStr;
+    document.getElementById('volume-end-date').value = todayStr;
+  }
+  
+  function loadDashboardData() {
+    // Load summary data and charts
+    fetch('/api/dashboard-data/' + athleteId)
+      .then(response => response.json())
+      .then(data => {
+        // Update summary metrics
+        document.getElementById('weekly-distance').textContent = data.weekly_distance || '0';
+        document.getElementById('monthly-distance').textContent = data.monthly_distance || '0';
+        document.getElementById('weekly-elevation').textContent = data.weekly_elevation || '0';
+        document.getElementById('training-load').textContent = data.training_load || '0';
+        
+        // Destroy previous charts if they exist
+        if (monthlyVolumeChart) {
+          monthlyVolumeChart.destroy();
+        }
+        
+        if (weeklyVolumeChart) {
+          weeklyVolumeChart.destroy();
+        }
+        
+        // Load weekly volume chart with HR zone stacking
+        const weeklyVolumeCtx = document.getElementById('weekly-volume-chart').getContext('2d');
+        
+        // Prepare stacked data for HR zones
+        const zoneColors = {
+          zone1: '#BAF3DB', // Light green - Z1
+          zone2: '#60C6A8', // Green - Z2  
+          zone3: '#FFDD57', // Yellow - Z3
+          zone4: '#FF9F40', // Orange - Z4
+          zone5: '#FF6B6B', // Red - Z5
+          no_hr: '#E5E7EB'  // Gray - No HR data
+        };
+        
+        const datasets = [];
+        const zoneLabels = ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'No HR'];
+        const zoneKeys = ['zone1', 'zone2', 'zone3', 'zone4', 'zone5', 'no_hr'];
+        
+        // Create a dataset for each HR zone
+        zoneKeys.forEach((zoneKey, index) => {
+          const zoneData = (data.weekly_zone_data || []).map(week => week[zoneKey] || 0);
+          
+          datasets.push({
+            label: zoneLabels[index],
+            data: zoneData,
+            backgroundColor: zoneColors[zoneKey],
+            borderColor: zoneColors[zoneKey],
+            borderWidth: 1
+          });
+        });
+        
+        weeklyVolumeChart = new Chart(weeklyVolumeCtx, {
+          type: 'bar',
+          data: {
+            labels: data.weekly_labels || ['Last Week', '2 Weeks Ago', '3 Weeks Ago', '4 Weeks Ago'],
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+              x: {
+                stacked: true
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Distance (km)'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  padding: 8,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                  label: function(context) {
+                    const value = context.parsed.y;
+                    if (value > 0) {
+                      return `${context.dataset.label}: ${value.toFixed(1)} km`;
+                    }
+                    return null;
+                  },
+                  footer: function(tooltipItems) {
+                    let total = 0;
+                    tooltipItems.forEach(item => {
+                      total += item.parsed.y;
+                    });
+                    return `Total: ${total.toFixed(1)} km`;
+                  }
+                }
+              }
+            },
+            animation: {
+              duration: 500
+            }
+          }
+        });
+        
+        // Load monthly volume chart with HR zone stacking
+        const monthlyVolumeCtx = document.getElementById('monthly-volume-chart').getContext('2d');
+        
+        // Prepare stacked data for HR zones (monthly)
+        const monthlyDatasets = [];
+        
+        // Create a dataset for each HR zone
+        zoneKeys.forEach((zoneKey, index) => {
+          const zoneData = (data.monthly_zone_data || []).map(month => month[zoneKey] || 0);
+          
+          monthlyDatasets.push({
+            label: zoneLabels[index],
+            data: zoneData,
+            backgroundColor: zoneColors[zoneKey],
+            borderColor: zoneColors[zoneKey],
+            borderWidth: 1
+          });
+        });
+        
+        monthlyVolumeChart = new Chart(monthlyVolumeCtx, {
+          type: 'bar',
+          data: {
+            labels: data.monthly_labels || ['This Month', 'Last Month', '2 Months Ago', '3 Months Ago', '4 Months Ago', '5 Months Ago'],
+            datasets: monthlyDatasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+              x: {
+                stacked: true
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Distance (km)'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  padding: 8,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                  label: function(context) {
+                    const value = context.parsed.y;
+                    if (value > 0) {
+                      return `${context.dataset.label}: ${value.toFixed(1)} km`;
+                    }
+                    return null;
+                  },
+                  footer: function(tooltipItems) {
+                    let total = 0;
+                    tooltipItems.forEach(item => {
+                      total += item.parsed.y;
+                    });
+                    return `Total: ${total.toFixed(1)} km`;
+                  }
+                }
+              }
+            },
+            animation: {
+              duration: 500
+            }
+          }
+        });
+        
+        // Load recent activities
+        if (data.recent_activities && data.recent_activities.length > 0) {
+          const recentActivitiesEl = document.getElementById('recent-activities');
+          recentActivitiesEl.innerHTML = '';
+          
+          data.recent_activities.slice(0, 5).forEach(activity => {
+            const date = new Date(activity.date);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric',
+              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            });
+            
+            // Format time in HH:MM:SS or MM:SS format
+            function formatTime(timeString) {
+              // If it's already in HH:MM:SS format, return as is
+              if (timeString.includes(':')) {
+                const parts = timeString.split(':');
+                if (parts.length === 3) {
+                  const hours = parseInt(parts[0]);
+                  const minutes = parts[1];
+                  const seconds = parts[2];
+                  if (hours > 0) {
+                    return `${hours}:${minutes}:${seconds}`;
+                  } else {
+                    return `${parseInt(minutes)}:${seconds}`;
+                  }
+                }
+                return timeString;
+              }
+              
+              // If it's in seconds, convert to HH:MM:SS
+              const totalSeconds = parseInt(timeString);
+              if (isNaN(totalSeconds)) return timeString;
+              
+              const hours = Math.floor(totalSeconds / 3600);
+              const minutes = Math.floor((totalSeconds % 3600) / 60);
+              const seconds = totalSeconds % 60;
+              
+              if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              } else {
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+              }
+            }
+            
+            const formattedTime = formatTime(activity.time);
+            
+            recentActivitiesEl.innerHTML += `
+              <div class="group hover:bg-gray-50 transition-colors duration-150 rounded-lg">
+                <a href="/activity/${activity.id}?athlete_id=${athleteId}" class="flex items-center p-4 block">
+                  <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-strava-orange to-orange-600 text-white flex items-center justify-center shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <div class="ml-4 flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <p class="text-sm font-semibold text-gray-900 truncate group-hover:text-strava-orange transition-colors duration-150">
+                        ${activity.name}
+                      </p>
+                      <p class="text-xs text-gray-500 font-medium">${formattedDate}</p>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        <span class="font-medium">${activity.distance} km</span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="font-medium">${formattedTime}</span>
+                      </div>
+                                             <div class="flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                         </svg>
+                         <span class="font-medium">${activity.pace} /km</span>
+                       </div>
+                    </div>
+                  </div>
+                  <div class="ml-2 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-strava-orange transition-colors duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </a>
+              </div>
+            `;
+          });
+        }
+      })
+      .catch(error => console.error('Error loading dashboard data:', error));
+  }
+  
+  // Function to load the Running Volume chart
+  function loadVolumeChart() {
+    var granularity = document.getElementById('granularity-select').value;
+    var startDate = document.getElementById('volume-start-date').value;
+    var endDate = document.getElementById('volume-end-date').value;
+    
+    fetch('/api/volume-data/' + athleteId + '?granularity=' + granularity + '&start_date=' + startDate + '&end_date=' + endDate)
+      .then(response => response.json())
+      .then(data => {
+        var periods = data.map(item => item.period);
+        var distances = data.map(item => item.distance_km);
+        
+        // Create chart with Chart.js
+        const volumeChart = document.getElementById('volume-chart');
+        
+        // Check if chart instance already exists and destroy it
+        if (volumeChartInstance) {
+          volumeChartInstance.destroy();
+        }
+        
+        volumeChartInstance = new Chart(volumeChart, {
+          type: 'bar',
+          data: {
+            labels: periods,
+            datasets: [{
+              label: 'Distance (km)',
+              data: distances,
+              backgroundColor: 'rgba(252, 82, 0, 0.7)',
+              borderColor: 'rgba(252, 82, 0, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Distance (km)'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: granularity === 'monthly' ? 'Month' : 'Week'
+                }
+              }
+            },
+            animation: {
+              duration: 500
+            }
+          }
+        });
+      })
+      .catch(error => console.error('Error loading volume chart:', error));
+  }
+  
+  // Prevent resize loops by disabling auto-resizing during tab switches
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('dashboard', () => ({
+      activeTab: 'overview',
+      
+      init() {
+        this.loadDashboardData()
+        this.loadVolumeData()
+        this.loadRacePredictions()
+      },
+      
+                setActiveTab(tab) {
+            this.activeTab = tab
+            // Small delay to make sure DOM is updated before resizing charts
+            setTimeout(() => {
+              if (monthlyVolumeChart) monthlyVolumeChart.resize();
+              if (weeklyVolumeChart) weeklyVolumeChart.resize();
+              if (volumeChartInstance) volumeChartInstance.resize();
+            }, 50);
+          },
+      
+      loadDashboardData() {
+        fetch(`/api/dashboard-data/{{ athlete_id }}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update metrics
+            document.getElementById('weekly-distance').textContent = data.weeklyDistance.toFixed(1);
+            document.getElementById('monthly-distance').textContent = data.monthlyDistance.toFixed(1);
+            document.getElementById('weekly-elevation').textContent = data.weeklyElevation.toFixed(0);
+            document.getElementById('training-load').textContent = data.trainingLoad.toFixed(0);
+            
+            // Update recent activities
+            const activitiesContainer = document.getElementById('recent-activities');
+            activitiesContainer.innerHTML = '';
+            
+            data.recentActivities.forEach(activity => {
+              const activityEl = document.createElement('a');
+              activityEl.href = `/activity/${activity.id}`;
+              activityEl.className = 'block hover:bg-gray-50 px-4 py-3 border-b border-gray-200 last:border-b-0';
+              
+              activityEl.innerHTML = `
+                <div class="flex justify-between items-center">
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">${activity.name}</div>
+                    <div class="text-xs text-gray-500">${activity.date}</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-medium">${(activity.distance / 1000).toFixed(2)} km</div>
+                    <div class="text-xs text-gray-500">${activity.pace}</div>
+                  </div>
+                </div>
+              `;
+              
+              activitiesContainer.appendChild(activityEl);
+            });
+          })
+          .catch(error => {
+            console.error('Error loading dashboard data:', error)
+          })
+      },
+      
+      loadVolumeData() {
+        fetch(`/api/volume-data/{{ athlete_id }}`)
+          .then(response => response.json())
+          .then(data => {
+            // Process volume data
+            createVolumeChart(data);
+          })
+          .catch(error => {
+            console.error('Error loading volume data:', error)
+          })
+      },
+      
+      loadRacePredictions() {
+        fetch(`/api/race-prediction-data/{{ athlete_id }}`)
+          .then(response => response.json())
+          .then(data => {
+            // Hide the loading indicator
+            document.getElementById('prediction-loading').classList.add('hidden')
+            
+            if (data.error) {
+              // Show error message if predictions couldn't be generated
+              document.getElementById('prediction-error').classList.remove('hidden')
+              return
+            }
+            
+            // Show the prediction content
+            const contentEl = document.getElementById('prediction-content')
+            contentEl.classList.remove('hidden')
+            
+            // Set the exponent value
+            document.getElementById('prediction-exponent').textContent = `e=${data.exponent.toFixed(3)}`
+            
+            // Generate the prediction rows
+            const predictionsContainer = contentEl.querySelector('.space-y-2')
+            predictionsContainer.innerHTML = ''
+            
+            Object.entries(data.key_predictions).forEach(([race, prediction]) => {
+              // Format race name
+              let displayName = race
+              if (race === '5km') displayName = '5K'
+              if (race === '10km') displayName = '10K'
+              
+              const predictionRow = document.createElement('div')
+              predictionRow.className = 'flex justify-between items-center p-2 rounded-md bg-gray-50'
+              predictionRow.innerHTML = `
+                <span class="text-sm font-medium">${displayName}</span>
+                <span class="text-sm">${prediction.realistic}</span>
+              `
+              predictionsContainer.appendChild(predictionRow)
+            })
+          })
+          .catch(error => {
+            console.error('Error loading race predictions:', error)
+            document.getElementById('prediction-loading').classList.add('hidden')
+            document.getElementById('prediction-error').classList.remove('hidden')
+          })
+      }
+    }))
+  });
+</script>
+{% endblock %}
