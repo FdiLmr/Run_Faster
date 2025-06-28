@@ -353,11 +353,13 @@ def view_best_efforts(athlete_id):
         all_efforts = []
 
         for label, column_name in effort_categories.items():
-            # Query for activities that have a non-null best-effort in that column
+            # Query for running activities that have a non-null and non-zero best-effort in that column
             efforts = (
                 Activity.query.filter(
                     Activity.athlete_id == athlete_id,
+                    Activity.type.in_(["Run", "Trail Run"]),
                     getattr(Activity, column_name) is not None,
+                    getattr(Activity, column_name) > 0,
                 )
                 .order_by(getattr(Activity, column_name))
                 .all()

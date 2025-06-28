@@ -35,7 +35,7 @@
       <button @click="activeDistance = '1 Mile'; filterDistance('1 Mile')" :class="{'bg-strava-orange text-white': activeDistance === '1 Mile', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '1 Mile'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
         1 Mile
       </button>
-      <button @click="activeDistance = '2 Miles'; filterDistance('2 mile')" :class="{'bg-strava-orange text-white': activeDistance === '2 Miles', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '2 Miles'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
+      <button @click="activeDistance = '2 mile'; filterDistance('2 mile')" :class="{'bg-strava-orange text-white': activeDistance === '2 mile', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '2 mile'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
         2 Miles
       </button>
       <button @click="activeDistance = '5km'; filterDistance('5km')" :class="{'bg-strava-orange text-white': activeDistance === '5km', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '5km'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
@@ -47,7 +47,7 @@
       <button @click="activeDistance = '15km'; filterDistance('15km')" :class="{'bg-strava-orange text-white': activeDistance === '15km', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '15km'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
         15km
       </button>
-      <button @click="activeDistance = '10 Miles'; filterDistance('10 mile')" :class="{'bg-strava-orange text-white': activeDistance === '10 Miles', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '10 Miles'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
+      <button @click="activeDistance = '10 mile'; filterDistance('10 mile')" :class="{'bg-strava-orange text-white': activeDistance === '10 mile', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '10 mile'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
         10 Miles
       </button>
       <button @click="activeDistance = '20km'; filterDistance('20km')" :class="{'bg-strava-orange text-white': activeDistance === '20km', 'bg-gray-100 text-gray-800 hover:bg-gray-200': activeDistance !== '20km'}" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200">
@@ -102,6 +102,8 @@
       <div class="mt-4">
         <p class="text-sm text-gray-700">{{ item.activity.name }}</p>
         <p class="text-xs text-gray-500 mt-1">{{ item.activity.start_date.strftime('%Y-%m-%d') if item.activity.start_date else '' }}</p>
+        <!-- Debug info: show activity ID and actual best effort times -->
+        <p class="text-xs text-gray-400 mt-1">ID: {{ item.activity.id }} | Distance: {{ item.distance_label }}</p>
         <div class="mt-4 text-right">
           <a href="/activity/{{ item.activity.id }}?athlete_id={{ athlete_id }}" class="text-sm font-medium text-strava-orange hover:text-strava-orange-dark">
             View Activity
@@ -142,12 +144,16 @@
 
   function applyFilters() {
     const items = document.querySelectorAll('.effort-card');
+    console.log(`Filtering: distance="${currentDistanceFilter}", year="${currentYearFilter}"`);
+    
     items.forEach(item => {
       const itemDistance = item.dataset.distance;
       const itemYear = item.dataset.year;
 
       const distanceMatch = (currentDistanceFilter === 'all' || itemDistance === currentDistanceFilter);
       const yearMatch = (currentYearFilter === 'all' || itemYear === currentYearFilter);
+
+      console.log(`Item: distance="${itemDistance}", year="${itemYear}", distanceMatch=${distanceMatch}, yearMatch=${yearMatch}`);
 
       if (distanceMatch && yearMatch) {
         item.style.display = '';
