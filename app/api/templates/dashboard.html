@@ -37,15 +37,6 @@
       <button @click="setActiveTab('running')" :class="{'border-strava-orange text-strava-orange': activeTab === 'running', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'running'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
         Running Volume
       </button>
-      <button @click="setActiveTab('trends')" :class="{'border-strava-orange text-strava-orange': activeTab === 'trends', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'trends'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-        Training Trends
-      </button>
-      <button @click="setActiveTab('predictions')" :class="{'border-strava-orange text-strava-orange': activeTab === 'predictions', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'predictions'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-        Race Predictions
-      </button>
-      <button @click="setActiveTab('activities')" :class="{'border-strava-orange text-strava-orange': activeTab === 'activities', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'activities'}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-        Recent Activities
-      </button>
     </nav>
   </div>
 
@@ -226,228 +217,6 @@
       </div>
       <div style="height: 300px; position: relative; max-width: 100%; overflow: hidden;">
         <canvas id="volume-chart"></canvas>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Training Trends Tab -->
-  <div x-show="activeTab === 'trends'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-      <h3 class="text-base font-medium text-gray-900 mb-4">Training Trends</h3>
-      <div id="time-series-chart-container">
-        <canvas id="time-series-chart" height="300"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Race Predictions Tab -->
-  <div x-show="activeTab === 'predictions'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-gray-900">Race Predictions</h2>
-      <a href="/race_predictions/{{ athlete_id }}" class="inline-flex items-center text-sm text-strava-orange hover:text-strava-orange-dark font-medium">
-        <span>Full Details</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </a>
-    </div>
-    
-    <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- About Predictions -->
-      <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
-        <h3 class="text-md font-semibold text-gray-900 mb-3">About Race Predictions</h3>
-        <p class="text-sm text-gray-700 mb-3">
-          These predictions use Riegel's formula: T2 = T1 × (D2/D1)<sup>e</sup>, with a personalized exponent 
-          calculated from your best 5K and 10K performances.
-        </p>
-        
-        <div id="prediction-tab-loading" class="py-4 text-center">
-          <svg class="animate-spin h-5 w-5 text-gray-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-        
-        <div id="prediction-tab-error" class="hidden py-4 text-center">
-          <p class="text-sm text-red-600">Unable to generate predictions. You need both 5K and 10K personal bests.</p>
-        </div>
-        
-        <div id="prediction-tab-info" class="hidden">
-          <div class="mt-3 grid grid-cols-2 gap-4">
-            <div class="bg-blue-50 rounded-md p-3">
-              <h4 class="text-xs font-medium text-blue-800 mb-1">Your Calculated Exponent</h4>
-              <p id="prediction-tab-exponent" class="text-lg font-semibold text-blue-900">1.06</p>
-              <p class="text-xs text-blue-700 mt-1">Lower values indicate better endurance</p>
-            </div>
-            <div class="bg-green-50 rounded-md p-3">
-              <h4 class="text-xs font-medium text-green-800 mb-1">Based On Performance</h4>
-              <p id="prediction-tab-base" class="text-lg font-semibold text-green-900">5K in 20:30</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Training Tips -->
-      <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
-        <h3 class="text-md font-semibold text-gray-900 mb-3">Training Recommendations</h3>
-        <div id="prediction-tab-recommendations" class="hidden">
-          <div>
-            <h4 class="text-sm font-medium text-gray-800 mb-2">Improve Your Endurance</h4>
-            <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
-              <li>Include more long runs in your training</li>
-              <li>Gradually increase weekly volume</li>
-              <li>Add tempo runs at marathon pace</li>
-            </ul>
-          </div>
-          <div class="mt-4">
-            <h4 class="text-sm font-medium text-gray-800 mb-2">Race Preparation Tips</h4>
-            <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
-              <li>Start with the conservative pace for the first third</li>
-              <li>Aim for realistic pace through the middle section</li>
-              <li>If feeling strong, push toward optimistic pace in final section</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Prediction Table -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <h3 class="font-medium text-gray-900">Race Time Predictions</h3>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead>
-            <tr class="bg-gray-50">
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Race Distance</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Optimistic</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Realistic</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conservative</th>
-            </tr>
-          </thead>
-          <tbody id="prediction-tab-table" class="bg-white divide-y divide-gray-200">
-            <!-- Will be populated by JavaScript -->
-            <tr>
-              <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
-                Loading predictions...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    
-    <script>
-      // Load the prediction data for this tab
-      document.addEventListener('alpine:init', () => {
-        Alpine.data('dashboard', () => ({
-          // ... existing code ...
-          
-          // Add this method to handle showing the predictions tab
-          loadPredictionsTabData() {
-            if (this.activeTab !== 'predictions') return;
-            
-            fetch(`/api/race-prediction-data/{{ athlete_id }}`)
-              .then(response => response.json())
-              .then(data => {
-                // Hide loading indicator
-                document.getElementById('prediction-tab-loading').classList.add('hidden');
-                
-                if (data.error) {
-                  // Show error if no predictions
-                  document.getElementById('prediction-tab-error').classList.remove('hidden');
-                  return;
-                }
-                
-                // Show the info sections
-                document.getElementById('prediction-tab-info').classList.remove('hidden');
-                document.getElementById('prediction-tab-recommendations').classList.remove('hidden');
-                
-                // Set exponent and base performance info
-                document.getElementById('prediction-tab-exponent').textContent = data.exponent.toFixed(3);
-                
-                // Populate the table
-                const tableBody = document.getElementById('prediction-tab-table');
-                tableBody.innerHTML = '';
-                
-                // Get full prediction data to show more details
-                fetch(`/api/full-race-predictions/{{ athlete_id }}`)
-                  .then(response => response.json())
-                  .then(fullData => {
-                    // Update the base performance display
-                    const basePerf = fullData.base_performance;
-                    document.getElementById('prediction-tab-base').textContent = 
-                      `${(basePerf.distance/1000).toFixed(1)}K in ${basePerf.formatted_time}`;
-                    
-                    // Add rows for each prediction
-                    Object.entries(fullData.predictions).forEach(([race, pred]) => {
-                      const row = document.createElement('tr');
-                      row.className = 'hover:bg-gray-50';
-                      
-                      row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${race}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pred.optimistic}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">${pred.realistic}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pred.conservative}</td>
-                      `;
-                      
-                      tableBody.appendChild(row);
-                    });
-                  })
-                  .catch(err => {
-                    console.error('Error loading full predictions:', err);
-                    tableBody.innerHTML = `
-                      <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-sm text-red-500">
-                          Failed to load detailed predictions.
-                        </td>
-                      </tr>
-                    `;
-                  });
-              })
-              .catch(error => {
-                console.error('Error loading predictions tab data:', error);
-                document.getElementById('prediction-tab-loading').classList.add('hidden');
-                document.getElementById('prediction-tab-error').classList.remove('hidden');
-              });
-          },
-          
-          setActiveTab(tab) {
-            this.activeTab = tab;
-            // Small delay to make sure DOM is updated before resizing charts
-            setTimeout(() => {
-              if (monthlyVolumeChart) monthlyVolumeChart.resize();
-              if (weeklyVolumeChart) weeklyVolumeChart.resize();
-              if (volumeChartInstance) volumeChartInstance.resize();
-              
-              // Load predictions tab data if needed
-              if (tab === 'predictions') {
-                this.loadPredictionsTabData();
-              }
-            }, 50);
-          }
-        }));
-      });
-    </script>
-  </div>
-
-  <!-- Activities Tab -->
-  <div x-show="activeTab === 'activities'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-base font-medium text-gray-900">Recent Activities</h3>
-        <a href="/view_activities/{{ athlete_id }}" class="text-strava-orange hover:text-strava-orange-dark text-sm font-medium">
-          View All
-        </a>
-      </div>
-      <div id="recent-activities">
-        <div class="animate-pulse">
-          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
-          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
-          <div class="h-14 bg-gray-200 rounded-md mb-3"></div>
-          <div class="h-14 bg-gray-200 rounded-md"></div>
-        </div>
       </div>
     </div>
   </div>
@@ -847,15 +616,15 @@
         this.loadRacePredictions()
       },
       
-                setActiveTab(tab) {
-            this.activeTab = tab
-            // Small delay to make sure DOM is updated before resizing charts
-            setTimeout(() => {
-              if (monthlyVolumeChart) monthlyVolumeChart.resize();
-              if (weeklyVolumeChart) weeklyVolumeChart.resize();
-              if (volumeChartInstance) volumeChartInstance.resize();
-            }, 50);
-          },
+      setActiveTab(tab) {
+        this.activeTab = tab
+        // Small delay to make sure DOM is updated before resizing charts
+        setTimeout(() => {
+          if (monthlyVolumeChart) monthlyVolumeChart.resize();
+          if (weeklyVolumeChart) weeklyVolumeChart.resize();
+          if (volumeChartInstance) volumeChartInstance.resize();
+        }, 50);
+      },
       
       loadDashboardData() {
         fetch(`/api/dashboard-data/{{ athlete_id }}`)
