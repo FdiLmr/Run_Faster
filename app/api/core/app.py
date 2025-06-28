@@ -34,7 +34,7 @@ def create_app(config_name="default"):
     # Create database tables
     with app.app_context():
         # Import models after database initialization to register them with SQLAlchemy
-        import models
+
         db.create_all()
         create_required_tables()
 
