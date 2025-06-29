@@ -208,6 +208,8 @@ class AllAthleteActivities(db.Model):
     freq_pace = db.Column(db.Float)
     cadence = db.Column(db.Float)
     athlete_count = db.Column(db.Float)
+    temperature = db.Column(db.Float, nullable=True)
+    humidity = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
         return f"<AllAthleteActivities {self.id} - {self.athlete_id}>"

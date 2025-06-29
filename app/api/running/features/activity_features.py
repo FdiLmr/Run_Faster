@@ -8,10 +8,12 @@ activities, including both running and non-running activities.
 from typing import List
 import pandas as pd
 import logging
+from datetime import datetime
 from ..processing.activity_processor import (
     get_non_run_activity_data,
     get_run_activity_data,
 )
+from utils.weather import get_weather_for_activity_id
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,15 @@ def extract_activity_features(
     """
     base_features = {"athlete_id": athlete_id, "block_id": block_id, "week_id": week_id}
 
+    # Get weather data for the activity
+    weather_data = {"temperature": None, "humidity": None}
+    if activity.get("start_date") and activity.get("start_latlng"):
+        weather_data = get_weather_for_activity_id(
+            str(activity.get("id", "")), 
+            activity["start_date"], 
+            activity["start_latlng"]
+        )
+
     try:
         if activity_type not in ["Run", "TrailRun"]:
             # Handle non-run activities
@@ -55,6 +66,8 @@ def extract_activity_features(
                 "elapsed_time": basic_data[2],
                 "distance": basic_data[3],
                 "mean_hr": basic_data[4],
+                "temperature": weather_data.get("temperature"),
+                "humidity": weather_data.get("humidity"),
             }
         else:
             # Handle run activities
@@ -81,6 +94,8 @@ def extract_activity_features(
                 "freq_pace": run_data[12],
                 "cadence": run_data[13],
                 "athlete_count": run_data[14],
+                "temperature": weather_data.get("temperature"),
+                "humidity": weather_data.get("humidity"),
             }
 
         new_features_df = pd.DataFrame([features]).dropna(axis=1, how="all")
